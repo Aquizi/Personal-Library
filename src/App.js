@@ -1,41 +1,30 @@
 import React, { useState } from "react";
 
 export default function App() {
-  const [rssUrl, setRssUrl] = useState("");
-  const [items, setItems] = useState([]);
+  const RSS_URL = "https://www.goodreads.com/review/list_rss/114948169?key=gOgOrxMUjL-fYnazWbtnenEUIxUc6m9j_vDKfcxIerqxUMn7&shelf=%23ALL%23/";
+  const [books, setBooks] = useState([]);
 
-  const getRss = async (e) => {
-    e.preventDefault();
-    const urlRegex = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
-    if (!urlRegex.test(rssUrl)) {
-      return;
-    }
-    const res = await fetch(`https://api.allorigins.win/get?url=${rssUrl}`);
+  const getFeed = async () => {
+    const res = await fetch(`https://api.allorigins.win/get?url=${RSS_URL}`);
     const { contents } = await res.json();
     const feed = new window.DOMParser().parseFromString(contents, "text/xml");
-    const items = feed.querySelectorAll("item");
-    const feedItems = [...items].map((el) => ({
+    const books = feed.querySelectorAll("item");
+    const feedBooks = [...books].map((el) => ({
       bookID: el.querySelector("book_id").innerHTML,
       author: el.querySelector("author_name").innerHTML,
     }));
-    setItems(feedItems);
+    setBooks(feedBooks);
   };
+
+  getFeed();
 
   return (
     <div className="App">
-      <form onSubmit={getRss}>
-        <div>
-          <label> rss url</label>
-          <br />
-          <input onChange={(e) => setRssUrl(e.target.value)} value={rssUrl} />
-        </div>
-        <input type="submit" />
-      </form>
-      {items.map((item) => {
+      {books.map((book) => {
         return (
           <div>
-            <h1>{item.bookID}</h1>
-            <h1>{item.author}</h1>
+            <h1>{book.bookID}</h1>
+            <h1>{book.author}</h1>
           </div>
         );
       })}
